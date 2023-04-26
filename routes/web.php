@@ -88,6 +88,6 @@ Route::fallback(function(){
 
 // Encaminhando parametros de rota para o controlador
 Route::get('/teste/{p1}/{p2}',[\App\Http\Controllers\TesteController::class,'teste'])
-->name('teste')
--> where('p1','[0-9]+')
--> where('p2','[0-9]+');
+    -> name('teste')
+    -> where('p1','[0-9]+')
+    -> where('p2','[0-9]+');
