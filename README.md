@@ -31,21 +31,22 @@ Essa separação de responsabilidades torna a aplicação mais organizada e fác
 | Caminho| Descrição|  
 | --- | --- |
 | app/console| comandos básicos para o laravel|
+| app/http/controllers| **<u>onde ficam os Controllers</u>**|
 | app/http/middleware | onde fica o middleware|
 | app/http/kernel.php | onde se registram os middlewares|
 | app/http/requests   | onde ficam as classes de validações.|
-| app/http/models     | onde ficam os models|
+| app/http/models     | **<u>onde ficam os Models</u>**|
 | app/http/providers  | onde ficam os provedores de serviços|
 | bootstrap           | responsavel pela inicialização do framework|
 | config              | configurações do sistema|
-| config/cors         | configurações de cors|
+| config/cors         | **<u>configurações de CORs</u>**|
 | database/factories  | para popular o database durante o desenvolvimento|
 | database/seeders    | onde ficam os seeds para popular os databases|
-| database/migrations | onde ficam as migrations|
+| database/migrations | **<u>onde ficam as Migrations</u>**|
 | lang                | diretorio onde ficam os idiomas|
 | public              | é o único diretorio visivel na web|
 | resources           | é onde ficam as telas e os assets no desenvolvimento|
-| routes/api          | é onde ficam a s nossa routes de api|
+| routes/api          | **<u>onde ficam as nossa Routes das APIs</u>**|
 | routes/channels     | para broadcasts|
 | routes/console| |
 | routes/web          | onde ficam as rotas para as páginas da web |
@@ -245,7 +246,7 @@ public function up(): void
 > php artisan migrate
 ```
 ## Chaves estrangeiras (1 para muitos)
-![Chaves estrangeiras (1 para 1)](/mdImages/chavesEstrangeiras_1_n.png)
+![Chaves estrangeiras (1 para n)](/mdImages/chavesEstrangeiras_1_n.png)
 ```php
 > php artisan make:migration create_unidades_table
 ```
@@ -296,8 +297,11 @@ public function down(): void
 ```
 
 ## Chaves estrangeiras (muitos para muitos)
+![Chaves estrangeiras (1 para n)](/mdImages/chavesEstrangeiras_n_n.png)
+```php
 > php artisan make:migration ajuste_produtos_filiais
-
+```
+```php
 public function up(): void
     {
         // Criação da tabela filiais
@@ -344,42 +348,326 @@ public function up(): void
         Schema::dropIfExists('filiais');
         
     }
+```
 
-Modificador after
-Serve para posicionar a coluna após uma coluna específica da tabela
+## Modificador after
+Serve para posicionar a coluna após uma coluna específica da tabela.
+
+```php
 public function up(): void
     {
         Schema::table('fornecedors', function (Blueprint $table) {
             // adicionar as colunas da tabela produtos
-            $table->string('site', 150)->after('nome')->nullable();
+            $table->string('site', 150)->nullable()->after('nome');
         });
     }
+```
 
-Comandos Status, Reset, Refresh e Fresh
-Status
+## Comandos Status, Reset, Refresh e Fresh
+### <u>Status</u>
+
+```php
 > php artisan migrate:status
-Migration name .................................................................................. Batch / Status  
-  2014_10_12_000000_create_users_table ................................................................... [1] Ran  
-  2014_10_12_100000_create_password_reset_tokens_table ................................................... [1] Ran  
-  2019_08_19_000000_create_failed_jobs_table ............................................................. [1] Ran  
-  2019_12_14_000001_create_personal_access_tokens_table .................................................. [1] Ran  
-  2023_04_25_191920_create_site_contatos_table ........................................................... [1] Ran  
-  2023_04_26_140723_create_fornecedors_table ............................................................. [2] Ran  
-  2023_04_26_143714_alter_fornecedors_novas_colunas ...................................................... [3] Ran  
-  2023_04_26_151157_create_produtos_table ................................................................ [4] Ran  
-  2023_04_26_170549_create_produto_detalhes_table ........................................................ [5] Ran  
-  2023_04_26_175248_create_unidades_table ................................................................ [6] Ran  
-  2023_04_26_184644_ajuste_produtos_filiais .............................................................. [7] Ran  
-  2023_04_27_133628_alter_fornecedores_nova_coluna_com_after ............................................. [8] Ran  
-Reset
-Faz com que o metodo down de todas as migrations seja executado, ai o banco de dados volta a posição inicial do banco de dados
+```
+```plaintext 
+Migration name ................................................ Batch / Status  
+  2014_10_12_000000_create_users_table ............................... [1] Ran  
+  2014_10_12_100000_create_password_reset_tokens_table ............... [1] Ran  
+  2019_08_19_000000_create_failed_jobs_table ......................... [1] Ran  
+  2019_12_14_000001_create_personal_access_tokens_table .............. [1] Ran  
+  2023_04_25_191920_create_site_contatos_table ....................... [1] Ran  
+  2023_04_26_140723_create_fornecedors_table ......................... [2] Ran  
+  2023_04_26_143714_alter_fornecedors_novas_colunas .................. [3] Ran  
+  2023_04_26_151157_create_produtos_table ............................ [4] Ran  
+  2023_04_26_170549_create_produto_detalhes_table .................... [5] Ran  
+  2023_04_26_175248_create_unidades_table ............................ [6] Ran  
+  2023_04_26_184644_ajuste_produtos_filiais .......................... [7] Ran  
+  2023_04_27_133628_alter_fornecedores_nova_coluna_com_after ......... [8] Ran 
+  ```
+   
+### <u>Reset</u>
+Faz com que o metodo down de todas as migrations seja executado, ai o banco de dados volta a posição inicial.
+
+```php
 > php artisan migrate:reset
-Refresh
-Faz o mesmo que o método Reset e depois da uma migrate de novo
+```
+### <u>Refresh</u>
+Faz o mesmo que o método Reset e depois executa uma migrate de novo.
+
+```php
 > php artisan migrate:refresh
-Fresh
+```
+### <u>Fresh</u>
 Parecido com refresh, mas ele dropa todos os objetos e após executa o migrate.
+```php
 > php artisan migrate:fresh
+```
+
+# Eloquent - ORM
+Mapeamento Objeto Relacional ou ORM faz com que a parte de programação se torne mais agil, pois fornece recursos para a gravação, atualização, seleção e remoção de registros que independem da base de dados e da linguagem de programação.
+Existem dois padrões de ORM, a saber: **Data Mapper** e **Active Record.**
+## Tinker
+Console interativo que nos permite testar os Models e o Eloquent, sem a necessidade de construirmos applicativos front-end.
+```php
+> php artisan tinker
+```
+
+## <u>Query Builder - Construindo consultas</u>
+Inserir registros no banco com Tinker
+```php 
+> $contato = new \App\Models\SiteContato();
+> $contato->nome = 'Ronaldo Lamp';
+> $contato->telefone = '(51)999101039';
+> $contato->email = 'lamp@r12.net';
+> $contato->motivo_contato = 1;
+> $contato->mensagem = 'Esta mensagem é sobre o tinker'
+> print_r($contato->getAttributes());
+> $contato->save();
+```
+## Ajustando o nome da tabela no Model  
+
+```php
+class Fornecedor extends Model
+{
+    use HasFactory;
+    // quando se define assim o nome da tabela, este nome se sobrepões
+    // ao nome padrão dado pelo laravel. 
+    // Se a classe fosse : SpecialFornecedor
+    // o nome padrão da tabela seria:
+    // Special_Fornecedor
+    // special_fornecedor
+    // special_fornecedors
+    // mas que passa a ser fornecedors
+    protected $table = 'fornecedors';
+}
+```
+## Inserindo Registros com Create e Fillable  
+Primeiro se mouda no Model a propriedade $fillable para permitirmos a inserção de registros com os campos especificados
+```php
+class Fornecedor extends Model
+{
+    use HasFactory;
+    protected $table = 'fornecedors';
+    protected $fillable = ['nome','site','uf','email'];
+}
+```
+Depois parte-se para a inserção propriamente dita.
+```php
+> \App\Models\Fornecedor::create([
+    'nome'=>'Fornecedor ABC',
+    'site'=>'fornecedorabc.com.br',
+    'uf'=>'RS',
+    'email'=>'mail@gmail.com'
+    ]);
+```
+Resposta  
+```plaintext
+= App\Models\Fornecedor {#6227
+    nome: "Fornecedor ABC",
+    site: "fornecedorabc.com.br",
+    uf: "RS",
+    email: "mail@gmail.com",
+    updated_at: "2023-04-27 15:19:48",
+    created_at: "2023-04-27 15:19:48",
+    id: 1,
+  }
+  ```
+## Selecionando registros com all()
+```php
+> $fornec = \App\Models\Fornecedor::all();
+ou
+> use \App\Models\Fornecedor
+> $fornec = Fornecedor::all();
+e também
+> print_r($fornec->toArray());
+```
+
+## Selecionando registros com find()  
+É igual ao all, mas esta função aguarda uma key referente à primaryKey.
+```php 
+> use \App\Models\Fornecedor
+> $fornec = Fornecedor::find(2);
+> $fornec->nome;
+> $fornec = Fornecedor::find([1,2]);
+> foreach($fornec as $f) {echo $f->nome; echo' - ';}
+```
+
+## Selecionando registros com where() 
+Ele é um construtor que permite seu uso com diversos outros métodos.  
+O where permite comparações complexas da seguinte maneira:  
+***where (comparação) operadorLógico (comparação)***  
+Vamos começar com a mais simples, do tipo ***where (comparação)***  
+os operadores de comparação são: ***<, >, <=, >=, ==, <>,like*** e outros...  
+
+```php
+> use \App\Models\SiteContato;
+// $cont = SiteContato::where('nome_coluna', 'operador', 'valor'); 
+> $cont = SiteContato::where('id','>',1);         //Retorna um Build
+> $cont = SiteContato::where('id','>',1)->get();  //Retorna uma Collection
+> foreach($ cont as $f) {echo $f->nome; echo' - ';}
+
+// se o operador for == podemos escrever o where como abaixo 
+> $cont = SiteContato::where('nome','Ronaldo Lamp')->get();
+
+// Para acessar somente o segundo elemento da coleção,
+// você pode usar o método get() ao invés do find(), e especificar
+// o índice do elemento desejado
+// (no caso, o índice 1 para o segundo elemento)
+// usando o método get novamente.
+> $colecao = SiteContato::whereIn('id', [1, 2])->get();
+> $primeiroNome = $colecao->first()->nome; 
+> $segundoNome = $colecao->get(1)->nome;
+> echo $segundoNome;
+
+> $c = SiteContato::where('mensagem','like','%para%')->get();
+> $c = SiteContato::where('mensagem','like','%para%')->get()->get(1)->nome;
+```
+
+## Selecionando registros com whereIn() e whereNotIn()
+Vamos utilizar o código abaixo para popularmos a base de dados
+```php
+> use \App\Models\SiteContato;
+> SiteContato::create(['nome'=>'João','telefone'=>'(88) 91111-2222','email'=>'joao@contato.com.br','motivo_contato'=>3,'mensagem'=>'É muito difícil localizar a opção de listar todos os produtos']);
+> SiteContato::create(['nome'=>'Rosa','telefone'=>'((33) 92222-3333','email'=>'rosa@contato.com.br','motivo_contato'=>1,'mensagem'=>'Quando custa essa aplicação?']);
+SiteContato::create(['nome'=>'Fernando','telefone'=>'(11) 94444-5555','email'=>'fernando@contato.com.br','motivo_contato'=>1,'mensagem'=>'Como consigo criar multiplos usuários para minha empresa?']);
+SiteContato::create(['nome'=>'Andre','telefone'=>'(88) 95555-6666','email'=>'andre@contato.com.br','motivo_contato'=>2,'mensagem'=>'Parabéns pela ferramenta, estou obtendo ótimos resultados!']);
+> SiteContato::create(['nome'=>'Ana','telefone'=>'(33) 96666-7777','email'=>'ana@contato.com.br','motivo_contato'=>3,'mensagem'=>'Não gostei muito das cores, consigo mudar de tema?']);
+> SiteContato::create(['nome'=>'Helena','telefone'=>'(11) 97777-8888','email'=>'helena@contato.com.br','motivo_contato'=>2,'mensagem'=>'Consigo controlar toda a minha empresa de modo fácil e prático.']);
+```
+Agora aos comandos  
+
+```php 
+> use \App\Models\SiteContato;
+> $cont = SiteContato::whereIn('campo_a_ser_comparado_por_igual','[array_de_parametros]');  // Retorna um Builder
+> $cont = SiteContato::whereNotIn('campo_a_ser_comparado_por_diferente',
+'[array_de_parametros]');   // Retorna um Builder
+> $cont->get();  // Retorna uma Collection
+> $cont = SiteContato::whereIn('Motivo',[1,2])->get();  // Retorna uma Collection
+> $cont = SiteContato::whereNotIn('Motivo',[1,2])->get();  // Retorna uma Collection
+```
+## Selecionando registros com whereBetween() e whereNotBetween()  
+```php 
+> use \App\Models\SiteContato;
+> $cont = SiteContato::whereBetween('campo_a_ser_comparado_por_entre', '[array_de_parametros]'); // Retorna um Builder
+> cont = SiteContato::whereBetween('id',[2,4])->get();  // Retorna uma Collection
+> cont = SiteContato::whereNotBetween('id',[2,4])->get(); // Retorna uma Collection
+```
+## Selecionando registros com dois ou mais where()  
+```php 
+$contatos = SiteContato::where('nome','<>','Fernando')
+        ->whereIn('motivo_contato',[1,2])
+        ->whereBteween('created_at',['2020-08-01 00:00:00','2020-08-01 23:59:59'])->get();
+// atenção que estamos trabalhando com o operador lógico AND 
+```
+
+## Selecionando registros com orWhere()
+```php 
+$contatos = SiteContato::where('nome','<>','Fernando')
+        ->orWhereIn('motivo_contato',[1,2])
+        ->orWhereBteween('created_at',['2020-08-01 00:00:00','2020-08-01 23:59:59'])->get();
+// atenção que estamos trabalhando com o operador lógico OR 
+```
+
+## Selecionando registros com WhereNull() e whereNotNull()
+```php 
+> $contatos = SiteContato::whereNull('updated_at')->get();
+> $contatos = SiteContato::whereNotNull('updated_at')->get();
+```
+
+## Selecionando registros com base em parametros data e hora
+```php
+> $cont = SiteContato::whereDate('created_at','2020-08-03')->get();
+> $cont = SiteContato::whereDay('created_at','30')->get();
+> $cont = SiteContato::whereMounth('created_at','8')->get();
+> $cont = SiteContato::whereYear('created_at','2020')->get();
+> $cont = SiteContato::whereTime('created_at','=','23:21')->get();
+> $cont = SiteContato::whereTime('created_at','>=','23:21')->get();
+```
+
+## Selecionando registros com whereColumn() e orWhereColumn()
+Este comando serve para comparar o conteudo de duas colunas,  
+e ***<u>não considera valores null</u>***
+```php
+> contatos = SiteContato::whereColumn('created_at','updated_at')->get();
+// quando se colocam somente o nome das colunas, a igualdade é testada.
+> contatos = SiteContato::whereDate('created_at','updated_at')->get();
+> contatos = SiteContato::whereDate('created_at','<>','updated_at')->get();
+```
+
+## Selecionando registros aplicando precedência em operações lógicas
+Exemplo: **(nome = 'Jorge' or nome = 'Ana') and (motivo_contato in [1,2] or id entre [4 ,6])**
+```php
+> $cont = SiteContato::where(function($query){})->where(function($query){})
+
+> $cont = SiteContato::where(function($query){
+    $query->where('nome','Jorge')
+    ->orWhere('nome','Ana');
+    })
+        ->where(function($query){
+    $query->whereIn('motivo_contato',[1,2])
+    ->orWhereBettwen('id',[4,6]);
+    })->get()   //Retorna uma Collection
+```
+
+## Ordenando Registros
+```php
+> $cont = SiteContato::orderBy('nome')->ger();        //ordem ascendente
+> $cont = SiteContato::orderBy('nome','asc')->ger();  //ordem ascendente
+> $cont = SiteContato::orderBy('nome','desc')->ger(); //ordem descendente
+```
+Para ordenarmos mais de uma coluna ao mesmo tempo  
+```php
+> $cont = SiteContato::orderBy('motivo_contato')->orderBy('nome')->get();
+```
+
+## <u>Collections</u>
+Métodos Disponíveis 
+## Collection methods first, last e reverse
+```php
+$cont = SiteContato::where('id', '>', 3)->get()  // Temos uma collection
+$cont->first();       // Retorna o primeiro elemento
+$cont->last();        // Retorna o último elemento
+$cont->reverse();     // Reverte a ordem da collection
+```
+## Collection toArray() e toJson()
+```php
+$cont->toArray();     // Converte a collection em um Array
+$cont->toJson();      // Converte a collection em Json
+```
+
+## Collection pluck()
+```php
+$cont = SiteContato::all()
+$cont->pluck('email');               //seleciona somente os campos email
+$cont->pluck('email','nome');   //cria uma collection associativa
+```
+Outros métodos:  
+Veja a documentação no link [collections](https://laravel.com/docs/10.x/collections#available-methods)
+
+## Atualizando os registros com save()
+```php
+> use \App\MOdels\Fornecedor;
+> $forn::Fornecedor::find(1);     // recuperamos o primeiro registro
+> $forn->nome = 'Fornecedor 123';
+> $forn->site = 'fornecedor123.com.br';
+> $forn->email = 'contato@fornecedor123.com.br';
+> $forn->save();
+```
+
+## Atualizando registros com fill() e save()
+```php
+> use \App\MOdels\Fornecedor;
+> $forn2::Fornecedor::find(2);     // recuperamos o segundo registro
+> $forn2->fill(['nome'=>'Fornecedor 789',
+             'site'=>'fornecedor789.com.br',
+             'email'=>'contato@fornecedor123.com.br'
+             ]);
+> $forn->save();
+```
+
+## Atualizando registros where() e update()
+
+
 
 
 
