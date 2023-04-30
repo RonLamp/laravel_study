@@ -529,8 +529,8 @@ Vamos utilizar o código abaixo para popularmos a base de dados
 > use \App\Models\SiteContato;
 > SiteContato::create(['nome'=>'João','telefone'=>'(88) 91111-2222','email'=>'joao@contato.com.br','motivo_contato'=>3,'mensagem'=>'É muito difícil localizar a opção de listar todos os produtos']);
 > SiteContato::create(['nome'=>'Rosa','telefone'=>'((33) 92222-3333','email'=>'rosa@contato.com.br','motivo_contato'=>1,'mensagem'=>'Quando custa essa aplicação?']);
-SiteContato::create(['nome'=>'Fernando','telefone'=>'(11) 94444-5555','email'=>'fernando@contato.com.br','motivo_contato'=>1,'mensagem'=>'Como consigo criar multiplos usuários para minha empresa?']);
-SiteContato::create(['nome'=>'Andre','telefone'=>'(88) 95555-6666','email'=>'andre@contato.com.br','motivo_contato'=>2,'mensagem'=>'Parabéns pela ferramenta, estou obtendo ótimos resultados!']);
+> SiteContato::create(['nome'=>'Fernando','telefone'=>'(11) 94444-5555','email'=>'fernando@contato.com.br','motivo_contato'=>1,'mensagem'=>'Como consigo criar multiplos usuários para minha empresa?']);
+> SiteContato::create(['nome'=>'Andre','telefone'=>'(88) 95555-6666','email'=>'andre@contato.com.br','motivo_contato'=>2,'mensagem'=>'Parabéns pela ferramenta, estou obtendo ótimos resultados!']);
 > SiteContato::create(['nome'=>'Ana','telefone'=>'(33) 96666-7777','email'=>'ana@contato.com.br','motivo_contato'=>3,'mensagem'=>'Não gostei muito das cores, consigo mudar de tema?']);
 > SiteContato::create(['nome'=>'Helena','telefone'=>'(11) 97777-8888','email'=>'helena@contato.com.br','motivo_contato'=>2,'mensagem'=>'Consigo controlar toda a minha empresa de modo fácil e prático.']);
 ```
@@ -638,7 +638,7 @@ $cont->toJson();      // Converte a collection em Json
 ## Collection pluck()
 ```php
 $cont = SiteContato::all()
-$cont->pluck('email');               //seleciona somente os campos email
+$cont->pluck('email');          //seleciona somente o campo email
 $cont->pluck('email','nome');   //cria uma collection associativa
 ```
 Outros métodos:  
