@@ -656,7 +656,7 @@ Veja a documentação no link [collections](https://laravel.com/docs/10.x/collec
 
 ## Atualizando registros com fill() e save()
 ```php
-> use \App\MOdels\Fornecedor;
+> use \App\Models\Fornecedor;
 > $forn2::Fornecedor::find(2);     // recuperamos o segundo registro
 > $forn2->fill(['nome'=>'Fornecedor 789',
              'site'=>'fornecedor789.com.br',
@@ -665,7 +665,296 @@ Veja a documentação no link [collections](https://laravel.com/docs/10.x/collec
 > $forn->save();
 ```
 
-## Atualizando registros where() e update()
+## Atualizando registros com where() e update()
+
+> use \app\Models\Fornecedor;
+Fornecedor::whereIn('id',[1,2])
+    ->update(['nome'=>'Fornecedor Teste','site'=>'teste.com.br']);
+Neste caso, vamos atualizar os dois registros selecionados com o mesmo valor para nome e o mesmo valor para email.
+
+
+## Deletando registros com delete() e destroy()
+> use \App\Models\SiteContato;
+$contato = SiteContato::find(4);
+$contato->delete();
+ou
+SiteContato::where('id',7)->delete();
+ou
+SiteContato::destroy(5);
+ou
+SiteContato::destroy([6,8]);
+
+## Deletando Registros com softDelete()
+Este método não exclui realmente o registro da tabela, mas ele adiciona uma coluna com o nome deleted_at e se o deleted_at possui uma data e hora, o Eloquent entende que este registro não existe mais.
+1.) trazer o softDelete para o contexto da nossa classe incluindo o comando
+use Illuminate\Database\Eloquent\SoftDeletes;
+// antes da definição de class
+class Fornecedor extends Model{
+// dentro da classe incluir o comando
+ use SoftDeletes;
+}
+ficando a classe Fornecedor com a seguinte sintaxe:
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Fornecedor extends Model
+{
+    use HasFactory;
+    // quando se define assim o nome da tabela, este nome se sobrepões
+    // ao nome padrão dado pelo laravel. 
+    // Se a classe fosse : SpecialFornecedor
+    // o nome padrão da tabela seria:
+    // Special_Fornecedor
+    // special_fornecedor
+    // special_fornecedors
+    // mas que passa a ser fornecedors
+    protected $table = 'fornecedors';
+    protected $fillable = ['nome','site','uf','email'];
+    // como o php não possue heranças multiplas, então não podemos extender 
+    // SoftDeletes pois já extendemos os Models
+    // Neste caso vamos usar as Traits para termos heranças multiplas 
+    // e escaparmos da restrição.
+    use SoftDeletes;
+}
+
+2.) e no arquivo de migration da criação da tabela, no caso a tabela de Fornecedores, *_create_fornecedores_table.php 
+Vamos incluir a instrução:
+$table->softDeletes();
+que ficará da seguinte maneira:
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('fornecedors', function (Blueprint $table) {
+            $table->id();
+            $table->string('nome',50);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('fornecedors');
+    }
+};
+ Este método será o responsavel pela criação da coluna deleted_at
+
+ Outra alternativa mais viável e lógica, será a criação de outra migration específica para a criação desta coluna na tabela Fornecedores, e faremos isto da seguinte maneira:
+
+ No comand:
+ λ php artisan make:migration alter_fornecedors_soft_deletes
+cria-se o arquivo migration da seguinte maneira
+{
+    // Run the migrations.
+    public function up(): void
+    {
+        Schema::table('fornecedors', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+    }
+    // Reverse the migrations.
+    public function down(): void
+    {
+        Schema::table('fornecedors', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+    }
+};
+
+ λ php artisan status
+
+agora, no thinker
+
+> use \App\Models\Fornecedor
+> $fornecedor = Fornecedor::find(2);
+> $fornecedor->delete();
+
+A partir daqui o registro tem uma data de deleção na base de dados, mas ele se torna inexistente ou excluido para o eloquent
+Se a partir daqui quisermos realmente deletar o registro, devemos usar o método forceDelete() da seguinte maneira:
+
+> $fornecedor::find(1)->forceDelete();
+
+## Selecionando e restaurando registros softDeletados()
+
+> $fornec = Fornecedor::withTrashed()->get();  // com todos
+> $fornec = Fornecedor::onlyTrashed()->get(); // somente os deletados
+> $fornec[0]->restore();  // para restaurar um registro deletado
+
+## Seeders
+São os responsáveis para semear as tabelas dos bancos de dados para testes e desenvolvimento.
+Aqui vamos reiniciar a nossa base de dados apar utilizarmos os seeders.
+
+λ php artisan migrate:fresh
+
+Criando o primeiro seed
+
+λ php artisan make:seeder FornecedorSeeder
+
+Incluir os registros no seeder
+
+<?php
+namespace Database\Seeders;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Fornecedor;
+
+class FornecedorSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+       // instanciando o objeto
+        $fornec = new Fornecedor();
+        $fornec->nome = 'Fornecedor100';
+        $fornec->site = 'fornecedor100.com.br';
+        $fornec->uf = 'CE';
+        $fornec->email = 'contato@fornecedor100.com.br';
+        $fornec->save();
+        // ou podemos fazer da seguinte maneira
+        // o método create (mas atenção para a propriedade fillable())
+        Fornecedor::create([
+            'nome'=>'Fornecedor200',
+            'site'=>'fornecedor200.com.br',
+            'uf'=>'RS',
+            'email'=>'contato@fronecedor200.com.br'
+        ]);
+        Fornecedor::create([
+            'nome'=>'Fornecedor300',
+            'site'=>'fornecedor300.com.br',
+            'uf'=>'SC',
+            'email'=>'contato@fronecedor300.com.br'
+        ]);
+        // ou podemos usar o método insert(), embora como não passa pelo
+        // eloquent, não é aconselhável o uso
+        // DB::table('fornecedors')->insert([
+        //     'nome'=>'Fornecedor300',
+        //     'site'=>'fornecedor300.com.br',
+        //     'uf'=>'SC',
+        //     'email'=>'contato@fronecedor300.com.br'
+        // ]);
+    }
+}
+
+E registrar no arquivo DatabaseSeeder o arquivos FornecedorSeeder da seguinte maneira:
+
+<?php
+namespace Database\Seeders;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        $this->call(FornecedorSeeder::class);
+    }
+}
+
+a partir de agora podeos acionar a semeadura (seeder) atraves do comando
+λ php artisan db:seed
+
+λ php artisan make:seeder SiteContatoSeeder
+
+<?php
+namespace Database\Seeders;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\SiteContato;
+class SiteContatoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $contato = new SiteContato();
+        $contato->nome = 'Sistema SG1';
+        $contato->telefone = '(11)999101039';
+        $contato->email = 'lamp@rc12.net';
+        $contato->motivo_contato = 1;
+        $contato->mensagem = 'Estamos por aqui para reclamar!';
+        $contato->save();
+    }
+}
+
+λ php artisan db:seed --class=SiteContatoSeeder
+par rodar apenas a classe SiteContatoSeeder, sem rodar as classes anteriores que já foram semeadas no database.
+
+## Factories
+Serve para semear as tabelas em massa com a dependencia Faker
+
+Para criar uma factory
+λ php artisan make:factory SiteContatoFactory --model=SiteContato
+
+<?php
+namespace Database\Seeders;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\SiteContato;
+class SiteContatoSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // $contato = new SiteContato();
+        // $contato->nome = 'Sistema SG1';
+        // $contato->telefone = '(11)999101039';
+        // $contato->email = 'lamp@rc12.net';
+        // $contato->motivo_contato = 1;
+        // $contato->mensagem = 'Estamos por aqui para reclamar!';
+        // $contato->save();
+        \App\Models\SiteContato::factory()->count(30)->create();
+    }
+}
+
+## Faker
+https://github.com/fzaninotto/faker
+Para criar o arquivo SiteContatoFactory, que é chamado acima, no SiteContatoSeeder
+
+<?php
+namespace Database\Factories;
+use Illuminate\Database\Eloquent\Factories\Factory;
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SiteContato>
+ */
+class SiteContatoFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'nome' => fake()->name(),
+            'telefone' => fake()->tollFreePhoneNumber,
+            'email' => fake()->unique()->freeEmail,
+            'motivo_contato' => fake()->numberBetween(1,3),
+            'mensagem' => fake()->text(30)
+        ];
+    }
+}
+
+e por fim o comando
+λ php artisan db:seed --class=SiteContatoSeeder
+para semearmos a tabela site_contatos através do SiteContatoSeeder
+
 
 
 
